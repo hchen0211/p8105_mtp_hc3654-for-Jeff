@@ -1,0 +1,27 @@
+---
+title: "p8105_mtp_hc3654"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+
+
+
+#Problem 1 – Data.
+
+```{r}
+eop_df_raw <-  read_excel("p8105_mtp_data.xlsx", skip = 8, sheet = 1, na = c("NA",".", "")) |> 
+  janitor::clean_names()
+```
+
+Clean data
+
+```{r}
+
+```
+
