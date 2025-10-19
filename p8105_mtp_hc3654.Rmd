@@ -23,5 +23,72 @@ Clean data
 
 ```{r}
 
+eop_df_clean <- eop_df_raw |> 
+  mutate(
+    sex = case_when(
+      sex == 1 ~ "male",
+      sex == 0 ~ "female"
+    ), 
+    sex = factor(sex),
+    eop_size_mm = case_when(
+      !is.na(eop_size_mm) ~ eop_size_mm,  
+  is.na(eop_size_mm)  ~ 0
+    ),
+
+    age_group = case_when(
+      age_group == 2 ~ "18-30 age",
+      age_group == 3 ~"31-40 age" ,
+      age_group == 4 ~ "41-50 age",
+      age_group == 5 ~ "51-60 age",
+      age_group %in% c(6,7,8) ~"60+ age"
+    ),
+    age_group = factor(age_group, 
+                       levels = c("18-30 age", "31-40 age", "41-50 age", "51-60 age", "60+ age"),
+                       ordered = TRUE),
+    eop_size = case_when( 
+      eop_size == 0 ~ "0-5mm eop size",
+      eop_size == 1 ~ "5-10mm eop size",
+      eop_size == 2 ~ "10-15mm eop size",
+      eop_size == 3 ~ "15-20mm eop size",
+      eop_size == 4 ~ "20-25mm eop size",
+      eop_size == 5 ~ "25+mm eop size"
+    ),
+   eop_size = factor(eop_size,
+                      levels = c("0-5mm eop size", "5-10mm eop size", "10-15mm eop size", "15-20mm eop size", "20-25mm eop size", "25+mm eop size"),
+                      ordered = TRUE),
+    eop_visibility_classification = case_when(
+      eop_visibility_classification == 0 ~ "eop size mm <= 5",
+      eop_visibility_classification == 1 ~ "0 < eop size mm <= 5",
+      eop_visibility_classification == 2 ~ "eop size mm >= 5"
+    ),
+    eop_visibility_classification = factor(eop_visibility_classification),
+    fhp_category = case_when(
+      fhp_category == 0 ~ "0mm-10mm",
+      fhp_category == 1 ~ "10mm-20mm",
+      fhp_category == 2 ~ "20mm-30mm",
+    ! (fhp_category %in% c(0, 1, 2)) ~ "other"
+    ),
+    fhp_category = factor(fhp_category)
+    )
+    
+         
+```
+
+
+```{r}
+eop_df_clean %>%
+  mutate(
+    eop_size_check = case_when(
+      eop_size_mm >= 0 & eop_size_mm <= 5 ~ "0-5mm eop size",
+      eop_size_mm > 5 & eop_size_mm <= 10 ~ "5-10mm eop size",
+      eop_size_mm > 10 & eop_size_mm <= 15 ~ "10-15mm eop size",
+      eop_size_mm > 15 & eop_size_mm <= 20 ~ "15-20mm eop size",
+      eop_size_mm > 20 & eop_size_mm <= 25 ~ "20-25mm eop size",
+      eop_size_mm > 25 ~ "25+mm eop size"
+    )) |> 
+  filter(eop_size != eop_size_check) |> 
+  select(sex, age, eop_size_mm, eop_size, eop_size_check) |> 
+  head(5) %>% # 
+  knitr::kable(caption = "Examples of category and value are differents")
 ```
 
