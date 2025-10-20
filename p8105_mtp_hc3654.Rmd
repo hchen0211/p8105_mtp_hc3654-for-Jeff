@@ -143,11 +143,65 @@ new_figured_4 <- eeop_age_sex_rate |>
 eop_df_clean |> 
   drop_na(fhp_size_mm, eop_size_mm, age_group, sex) |> 
   ggplot(aes(x = fhp_size_mm, y= eop_size_mm, color = sex))+
-  geom_jitter(color = "lightblue", alpha = 0.4)+
+  geom_point( alpha = 0.4)+
+  scale_color_manual(values = c("pink", "lightblue"))+
   geom_smooth(se = FALSE, color = "grey", linewidth = 0.5)+
   facet_grid(sex ~ age_group)+
   theme_bw()
 ```
 
+# Problem 3:
+Numbers of participants in each age group was: 18–30 n = 300, 31–40 n = 200, 41–50 n = 200, 51–60 n = 200 and >60 n = 300. 
+
+```{r}
+#among age group samples
+eop_df_clean |> 
+  drop_na(age_group) |> 
+  group_by(age_group) |> 
+  summarise(number = n())
+
+  
+```
+
+```{r}
+
+#mean and sd of fhp
+eop_df_clean |> 
+  drop_na(fhp_size_mm,sex)|> 
+  group_by(sex) |> 
+  summarise(
+    average_fhp = mean(fhp_size_mm), sd_fhp = sd(fhp_size_mm)
+  )
+
+
+  
+```
+
+```{r}
+#cummlative prevalence 
+eop_df_clean |> 
+  drop_na(age_group, eop_size_mm, sex) |> 
+  mutate(eeop = case_when(
+    eop_size_mm > 10 ~ "Disease",
+    eop_size_mm <= 10 ~ "No Disease"
+  )) |> 
+  select(sex, age_group, eop_size_mm, eeop) |> 
+  group_by(eeop) |> 
+  summarise(number = n()) |> 
+  mutate(prevalence = number/ sum(number))
+```
+
+```{r}
+eop_df_clean |> 
+  drop_na(age, age_group, fhp_size_mm, sex) |> 
+  mutate(fhp_40 = case_when(
+    fhp_size_mm > 40 ~ "FHP >40 mm",
+    fhp_size_mm <= 40 ~ "FHP <= 40 mm"
+  )) |> 
+  filter(age_group == "60+ age") |> 
+  group_by(fhp_40) |> 
+  summarise(number = n()) |> 
+  mutate(fhp_freq = number / sum(number))
+```
 
 
