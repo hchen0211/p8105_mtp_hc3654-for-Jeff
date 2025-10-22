@@ -24,12 +24,14 @@ I will first detail the data cleaning process, then create improved visualizatio
 # Problem 1
 
 ```{r}
+#Import data
 eop_df_raw <-  read_excel("p8105_mtp_data.xlsx", skip = 8, sheet = 1, na = c("NA",".", "")) |> 
   janitor::clean_names()
 ```
 
 ```{r}
 
+#Clean data
 eop_df_clean <- eop_df_raw |> 
   mutate(
     sex = case_when(
@@ -86,7 +88,8 @@ eop_df_clean |>
   pivot_wider(
     names_from = age_group,
     values_from = number
-  )
+  ) |> 
+  knitr::kable()
          
 ```
 
@@ -106,7 +109,8 @@ eop_df_clean |>
       eop_size_mm > 25 ~ "25+mm eop size"
     )) |> 
   filter(eop_size != eop_size_check) |> 
-  select(sex, age, eop_size_mm, eop_size, eop_size_check)
+  select(sex, age, eop_size_mm, eop_size, eop_size_check) |> 
+  knitr::kable()
 
 eop_df_compare
 ```
@@ -128,7 +132,9 @@ age_group_check = case_when(
     )
   ) |> 
   filter(age_group != age_group_check) |> 
-  select(sex, age, age_group, age_group_check)
+  select(sex, age, age_group, age_group_check)|> 
+  knitr::kable()
+
 
 age_compare
 ```
@@ -149,11 +155,13 @@ inconsistent_fhp <- eop_df_clean |>
 inconsistent_fhp
 ```
 
-This process revealed widespread inconsistencies in the dataset's categorical variables. I found `r nrow(eop_df_compare)` errors in eop_size, `r nrow(age_compare)` in age_group, and `r nrow(inconsistent_fhp)` in fhp_category. Since in the raw dataset most of people in age between in 70 - 80 is in Age group 7, so I will consider the 86 belong to 7 is a mistake. 
+This process revealed widespread inconsistencies in the dataset's categorical variables. I found `r nrow(eop_df_compare)` errors in eop_size, `r nrow(age_compare)` in age_group, and `r nrow(inconsistent_fhp)` in fhp_category. Raw dataset most of people in age between in 70-80 is in Age group 7, consider the 86 belong to 7 is a mistake. 
 
 # Problem 2:
 
 ```{r}
+#New figure 3
+
 new_figured_3 <- 
 eop_df_clean |> 
   drop_na(fhp_size_mm, age_group) |> 
@@ -165,6 +173,9 @@ eop_df_clean |>
 ```
 
 ```{r}
+
+#New Figure 4
+
 eeop_age_sex_rate <- 
 eop_df_clean |> 
   drop_na(age_group, eop_size_mm, sex) |> 
@@ -191,8 +202,7 @@ new_figured_4 <- eeop_age_sex_rate |>
   ggplot(aes(x = age_group, y = eeop_rate, color = sex, group = sex))+
   geom_line()+
   geom_text(aes(label = percent(eeop_rate, accuracy = 1),
-                vjust = -0.8,
-                size = 3))+
+                vjust = -0.8))+
   scale_y_continuous(labels = percent, limits = c(0, 1)) +
   labs(title = "Improved Figure 4: Rate of Enlarged EOP", 
        x = "Age Groups",
@@ -204,6 +214,8 @@ new_figured_4 <- eeop_age_sex_rate |>
 ## Two Panels Figure
 
 ```{r}
+#Two panels figure
+
 (new_figured_3/new_figured_4)+
    plot_annotation(
     title = "Analysis of FHP Distribution and Rate of Enlarged EOP")
@@ -211,11 +223,13 @@ new_figured_4 <- eeop_age_sex_rate |>
 
 
 Panel A's boxplots show FHP size, jitters shows distribution, which increases slightly with age, is generally higher in males. 
-Panel B corrects a key error in the original paper, showing the Enlarged EOP (EEOP) rate increases with age and is much higher in males, contradicting the original conclusio
+Panel B corrects a key error in the original paper, showing the Enlarged EOP (EEOP) rate increases with age and is higher in males, contradicting the original conclusio
 
 ## 2 x 5 collection of panels
 
 ```{r}
+
+#2 x 5 collection of panels
 eop_df_clean |> 
   drop_na(fhp_size_mm, eop_size_mm, age_group, sex) |> 
   ggplot(aes(x = fhp_size_mm, y= eop_size_mm, color = sex))+
@@ -227,7 +241,7 @@ eop_df_clean |>
   labs(title = "Relate between EOP and FHP in different age groups acrooss gender", y = "EOP size", x= "FHP size")
 ```
 
-Linear regression methods in the point graph to examine the relationship between EOP and FHP size. The resulting trend lines indicate a clear positive correlation across all sex and age groups, meaning as FHP size increases, EOP size also tends to increase. It is also noteworthy that more extreme EOP values are present in the 18-30 age group.
+Linear regression methods in the point graph to examine the relationship between EOP and FHP size. Resulting trend lines indicate a clear positive correlation across all sex and age groups, meaning as FHP size increases, EOP size also tends to increase. It is also noteworthy that more extreme EOP values are present in the 18-30 age group.
 
 
 # Problem 3:
@@ -249,7 +263,7 @@ eop_df_clean |>
   
 ```
 
-Most of age_groups number is slightly different to author mentions in article. 51-60 age is exact same. 
+Most of age_groups number is different to author mentions in article. 51-60 age is exact same. 
 
 ```{r}
 
@@ -266,7 +280,7 @@ eop_df_clean |>
   
 ```
 
-The avarage fhp size for male and female is pretty close to the author mentions in the article. 
+The avarage fhp size for male and female is close to the author mentions in the article. 
 
 
 ```{r}
@@ -312,7 +326,7 @@ My recalculation of the author's statistics showed mixed results.
 
 The mean FHP size and overall EEOP prevalence were largely reproducible (32.1% vs. 33%). However, the reported sample sizes by age were mostly incorrect, and another key statistic was slightly off (32.6% vs. 34.5%).
 
-Overall, the paper's broad statistics seem verifiable, but its details are unreliable.
+Crucially, the dataset lacks any mobile usage data, making it impossible to prove the link between phones and “horns.” Future studies must include this data.
 
 
 
